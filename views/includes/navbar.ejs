@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+  <div class="container">
+    <!-- Brand (Logo and Text) -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <%- include('logo') %> <!-- This includes your logo.ejs -->
+      <!-- <span class="ms-2 h3" style="color: #0d9488;">StayHub</span> -->
+    </a>
+
+    <!-- Toggle Button (Mobile) -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Nav Links -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link " href="#features">Features</a>
+        </li> -->
+        <!-- <li class="nav-item">
+          <a class="nav-link" href="#how-it-works">How it Works</a>
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link " href="#about-us">About Us</a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link " href="/login">Log In</a>
+        </li> -->
+      </ul>
+
+      <!-- Right Buttons -->
+      <div class="ms-lg-3">
+        <a href="/signup" class="btn btn-primary px-4" style="background-color: #0d9488; border-radius: 25px;">Get Started</a>
+      </div>
+    </div>
+  </div>
+</nav>
