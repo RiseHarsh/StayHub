@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Sign-Up</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .auth-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            padding: 30px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .auth-container h3 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            font-size: 0.9rem;
+            color: #555;
+            transition: 0.3s ease;
+        }
+
+        .form-control {
+            border: 1px solid #ccc;
+            padding: 10px 40px;
+            border-radius: 6px;
+            width: 100%;
+            background: #f9f9f9;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border: 1px solid #007bff;
+        }
+
+        .form-group .material-icons {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #555;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .switch-btn {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .switch-btn a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .switch-btn a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            display: none;
+            margin-top: 10px;
+            color: #f00;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <!-- Login Form -->
+    <div id="login-form">
+        <h3>Login</h3>
+        <div class="alert alert-danger" id="login-error" style="display: none;"></div>
+        <div class="form-group">
+            <label for="login-email">Email</label>
+            <i class="material-icons">email</i>
+            <input type="email" id="login-email" class="form-control" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+            <label for="login-password">Password</label>
+            <i class="material-icons">lock</i>
+            <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+        </div>
+        <button class="btn" onclick="login()">Login</button>
+        <div class="switch-btn">
+            <span>Don't have an account? <a href="javascript:void(0);" onclick="showSignUpForm()">Sign Up</a></span>
+        </div>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div id="signup-form" style="display: none;">
+        <h3>Sign Up</h3>
+        <div class="alert alert-danger" id="signup-error" style="display: none;"></div>
+        <div class="form-group">
+            <label for="signup-email">Email</label>
+            <i class="material-icons">email</i>
+            <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+            <label for="signup-password">Password</label>
+            <i class="material-icons">lock</i>
+            <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required>
+        </div>
+        <div class="form-group">
+            <label for="signup-confirm-password">Confirm Password</label>
+            <i class="material-icons">lock</i>
+            <input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm your password" required>
+        </div>
+        <button class="btn" onclick="signUp()">Sign Up</button>
+        <div class="switch-btn">
+            <span>Already have an account? <a href="javascript:void(0);" onclick="showLoginForm()">Login</a></span>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script>
+    // Firebase config (replace with your Firebase project details)
+    const firebaseConfig = {
+        apiKey: "<YOUR_API_KEY>",
+        authDomain: "<YOUR_AUTH_DOMAIN>",
+        projectId: "<YOUR_PROJECT_ID>",
+        storageBucket: "<YOUR_STORAGE_BUCKET>",
+        messagingSenderId: "<YOUR_MESSAGING_SENDER_ID>",
+        appId: "<YOUR_APP_ID>"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Show Sign Up Form
+    function showSignUpForm() {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('signup-form').style.display = 'block';
+    }
+
+    // Show Login Form
+    function showLoginForm() {
+        document.getElementById('signup-form').style.display = 'none';
+        document.getElementById('login-form').style.display = 'block';
+    }
+
+    // Login function
+    function login() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                window.location.href = "/dashboard";  // Redirect on success
+            })
+            .catch((error) => {
+                const errorMessage = error.message;
+                document.getElementById('login-error').style.display = 'block';
+                document.getElementById('login-error').innerText = errorMessage;
+            });
+    }
+
+    // Sign Up function
+    function signUp() {
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+        if (password !== confirmPassword) {
+            document.getElementById('signup-error').style.display = 'block';
+            document.getElementById('signup-error').innerText = 'Passwords do not match';
+            return;
+        }
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .then(() => {
+                window.location.href = "/dashboard";  // Redirect on success
+            })
+            .catch((error) => {
+                const errorMessage = error.message;
+                document.getElementById('signup-error').style.display = 'block';
+                document.getElementById('signup-error').innerText = errorMessage;
+            });
+    }
+</script>
+
+</body>
+</html>

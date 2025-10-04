@@ -30,3 +30,7 @@ yarn-error.log*
 node_modules/   
 
 package-lock.json
+
+stayhub-1-firebase-adminsdk-fbsvc-be2e49ff02.json
+
+firebase.js

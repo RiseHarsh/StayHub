@@ -1,0 +1,26 @@
+<!-- <section class="listings ">
+        <h1>Our Top Listings</h1>
+        <div class="listing-container">
+            <% listings.forEach(function(listing) { %>
+                <div class="listing-card">
+                    <img src="" alt="<%= listing.title %>">
+                    <h2></h2>
+                    <p><%= listing.description %></p>
+                    <p><strong>Location:</strong> <%= listing.location %>, <%= listing.country %></p>
+                    <p><strong>Price: $</strong></p>
+                    <button>Book Now</button>
+                </div>
+            <% }); %>
+        </div>
+    </section> -->
+
+<div class="card" style="width: 18rem">
+  <% listings.forEach(function(listing) { %>
+  <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
+  <div class="card-body">
+    <h5 class="card-title"><%= listing.title %></h5>
+    <p class="card-text"><%= listing.price %> per night</p>
+    <a href="#" class="btn btn-primary">Book Now</a>
+  </div>
+  <% }); %>
+</div>

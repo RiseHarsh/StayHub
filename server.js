@@ -11,19 +11,41 @@ app.use(express.json());
 app.use(expressLayouts);
 app.set('layout', 'layouts/boilerplate');
 
-app.get('/', (req, res) => {
-  res.render('layouts/boilerplate', { 
-    title: 'Home',
-    body: `
-      <div class="text-center">
-        <h1 class="mt-5">Welcome to StayHub</h1>
-        <p class="lead">This is just a test page for the navbar and footer.</p>
-        <a href="/features" class="btn btn-primary mt-3">Go to Features</a>
-      </div>
-    `
-  });
+// Firebase Admin SDK setup
+const admin = require('firebase-admin');
+const serviceAccount = require('./stayhub-1-firebase-adminsdk-fbsvc-be2e49ff02.json');
+
+// Initialize Firebase Admin SDK
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
 });
 
+const db = admin.firestore();
+
+app.get('/lp', (req, res) => {
+  res.render('landingpage', { 
+    title: 'Home' });
+});
+
+app.get('/', async (req, res) => {
+  try {
+    const snapshot = await db.collection('lists').get();
+    const listings = snapshot.docs.map(doc => doc.data());
+    res.render('landingpage', { listings });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+app.get('/landing-page', (req, res) => {
+  res.render('landingpage', { title: 'Home' });  // Fixed here, removed the 'views/' prefix
+});
+
+
+app.get('/login-page', (req, res) => {
+  res.render('login-page', { title: 'Login' });
+});
 
 app.listen(8080, () => {
   console.log('Server is running on port 8080');
