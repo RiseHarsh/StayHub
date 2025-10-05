@@ -4,6 +4,8 @@ const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
@@ -43,7 +45,7 @@ app.get('/landing-page', (req, res) => {
 });
 
 
-app.get('/login-page', (req, res) => {
+app.get('/auth', (req, res) => {
   res.render('login-page', { title: 'Login' });
 });
 

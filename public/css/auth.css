@@ -1,0 +1,40 @@
+
+.plus-jakarta-sans-uniquifier> {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+body{
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.card-img-top{
+    width: 100% !important;
+    height: 200px !important;
+    object-fit: cover !important;
+    border-radius: 1rem !important;
+}
+
+.card{
+    border-radius: 1rem !important;
+    border-style: none;
+    /* display: ; */
+}
+
+.card-link{
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+
+.card-height {
+  display: flex;    
+}
+
+.card-body b {
+  min-height: 48px; /* ensures consistent title area */
+  display: inline-block;
+}
+

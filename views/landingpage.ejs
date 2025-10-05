@@ -14,13 +14,36 @@
         </div>
     </section> -->
 
-<div class="card" style="width: 18rem">
-  <% listings.forEach(function(listing) { %>
-  <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
-  <div class="card-body">
-    <h5 class="card-title"><%= listing.title %></h5>
-    <p class="card-text"><%= listing.price %> per night</p>
-    <a href="#" class="btn btn-primary">Book Now</a>
+<!-- <a class="click" href="">
+  <div
+    class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1 g-4 plus-jakarta-sans-uniquifier">
+
+    <% listings.forEach(function(listing) { %>
+    <div class="card cols" style="width: 20rem">
+      <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
+      <div class="card-body">
+        <h5 class="card-title"><%= listing.title %></h5>
+        <p class="card-text">&#8377; <%= listing.price %>/night</p>
+        <a href="#" class="btn btn-primary">Book Now</a>
+      </div>
+    </div>
+    <% }); %>
   </div>
+</a> -->
+
+<div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+  <% listings.forEach(function(listing) { %>
+    <div class="col mb-4 card-height">
+      <a href="#" class="card-link">
+        <div class="card" style="width: 20rem">
+          <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
+          <div class="card-body d-flex flex-column">
+            <b><%= listing.title %></b>  <br>
+            <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %>/night</p>
+            <a href="#" class="btn btn-primary">Book Now</a>
+          </div>
+        </div>
+      </a>
+    </div>
   <% }); %>
 </div>
