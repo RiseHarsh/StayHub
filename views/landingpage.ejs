@@ -31,12 +31,13 @@
   </div>
 </a> -->
 
-<div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+<!-- <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
   <% listings.forEach(function(listing) { %>
     <div class="col mb-4 card-height">
-      <a href="#" class="card-link">
+      <a href="/property/<%= listings._id %>" class="card-link">
         <div class="card" style="width: 20rem">
           <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
+          <div class="card-img-overlay"><%= listing.description %></div>
           <div class="card-body d-flex flex-column">
             <b><%= listing.title %></b>  <br>
             <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %>/night</p>
@@ -46,4 +47,32 @@
       </a>
     </div>
   <% }); %>
+</div> -->
+
+<div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+  <% listings.forEach(function(listing) { %>
+    <div class="col mb-4 card-height">
+      <div class="card card-click" data-id="<%= listing.id %>" style="width: 20rem">
+        <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
+        <div class="card-img-overlay"><%= listing.description %></div>
+        <div class="card-body d-flex flex-column">
+          <b><%= listing.title %></b><br>
+          <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %>/night</p>
+          <a href="#" class="btn btn-primary">Book Now</a>
+        </div>
+      </div>
+    </div>
+  <% }); %>
 </div>
+
+<script>
+  // Select all cards and attach click event listeners
+  document.querySelectorAll('.card-click').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.getAttribute('data-id');
+      // console.log('Card clicked with ID:', id);
+      // Optional: navigate to the property page
+      window.location.href = `/property/${id}`;
+    });
+  });
+</script>

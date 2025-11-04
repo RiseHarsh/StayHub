@@ -24,15 +24,14 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-app.get('/lp', (req, res) => {
-  res.render('landingpage', { 
-    title: 'Home' });
-});
 
 app.get('/', async (req, res) => {
   try {
     const snapshot = await db.collection('lists').get();
-    const listings = snapshot.docs.map(doc => doc.data());
+    const listings = snapshot.docs.map(doc => ({
+      id: doc.id,      // <-- include the document ID
+      ...doc.data()    // <-- spread the rest of the fields
+    }));
     res.render('landingpage', { listings });
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -40,13 +39,35 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.get('/landing-page', (req, res) => {
-  res.render('landingpage', { title: 'Home' });  // Fixed here, removed the 'views/' prefix
+
+//view route
+app.get('/property/:id', async (req, res) => {
+  try {
+    const docRef = db.collection('lists').doc(req.params.id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).send('Property not found');
+    }
+
+    const listing = { id: doc.id, ...doc.data() };
+    res.render('view-page', { listing });
+  } catch (error) {
+    console.error('Error fetching property:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 
+
+//authentication route
 app.get('/auth', (req, res) => {
   res.render('login-page', { title: 'Login' });
+});
+
+//404 route
+app.use((req,res)=>{
+  res.send('404 Page Not Found');
 });
 
 app.listen(8080, () => {
