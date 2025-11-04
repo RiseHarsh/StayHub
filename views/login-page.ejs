@@ -3,168 +3,105 @@
     <!-- Login Form -->
     <div id="login-form">
       <h3>Login</h3>
-      <div
-        class="alert alert-danger"
-        id="login-error"
-        style="display: none"
-      ></div>
+      <div class="alert alert-danger" id="login-error" style="display: none"></div>
       <div class="form-group">
         <label for="login-email">Email</label>
         <i class="material-icons">email</i>
-        <input
-          type="email"
-          id="login-email"
-          class="form-control"
-          placeholder="Enter your email"
-          required
-        />
+        <input type="email" id="login-email" class="form-control" placeholder="Enter your email" required />
       </div>
       <div class="form-group">
         <label for="login-password">Password</label>
         <i class="material-icons">lock</i>
-        <input
-          type="password"
-          id="login-password"
-          class="form-control"
-          placeholder="Enter your password"
-          required
-        />
+        <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required />
       </div>
-      <button class="btn" onclick="login()">Login</button>
+      <button class="btn" id="login-btn">Login</button>
       <div class="switch-btn">
-        <span
-          >Don't have an account?
-          <a href="javascript:void(0);" onclick="showSignUpForm()"
-            >Sign Up</a
-          ></span
-        >
+        <span>Don't have an account? <a href="javascript:void(0);" onclick="showSignUpForm()">Sign Up</a></span>
       </div>
     </div>
 
     <!-- Sign Up Form -->
     <div id="signup-form" style="display: none">
       <h3>Sign Up</h3>
-      <div
-        class="alert alert-danger"
-        id="signup-error"
-        style="display: none"
-      ></div>
+      <div class="alert alert-danger" id="signup-error" style="display: none"></div>
       <div class="form-group">
         <label for="signup-email">Email</label>
         <i class="material-icons">email</i>
-        <input
-          type="email"
-          id="signup-email"
-          class="form-control"
-          placeholder="Enter your email"
-          required
-        />
+        <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required />
       </div>
       <div class="form-group">
         <label for="signup-password">Password</label>
         <i class="material-icons">lock</i>
-        <input
-          type="password"
-          id="signup-password"
-          class="form-control"
-          placeholder="Create a password"
-          required
-        />
+        <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required />
       </div>
       <div class="form-group">
         <label for="signup-confirm-password">Confirm Password</label>
         <i class="material-icons">lock</i>
-        <input
-          type="password"
-          id="signup-confirm-password"
-          class="form-control"
-          placeholder="Confirm your password"
-          required
-        />
+        <input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm your password" required />
       </div>
-      <button class="btn" onclick="signUp()">Sign Up</button>
+      <button class="btn" id="signup-btn">Sign Up</button>
       <div class="switch-btn">
-        <span
-          >Already have an account?
-          <a href="javascript:void(0);" onclick="showLoginForm()"
-            >Login</a
-          ></span
-        >
+        <span>Already have an account? <a href="javascript:void(0);" onclick="showLoginForm()">Login</a></span>
       </div>
     </div>
   </div>
 </main>
 
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script>
-  // Firebase config (replace with your Firebase project details)
-  const firebaseConfig = {
-    apiKey: "<YOUR_API_KEY>",
-    authDomain: "<YOUR_AUTH_DOMAIN>",
-    projectId: "<YOUR_PROJECT_ID>",
-    storageBucket: "<YOUR_STORAGE_BUCKET>",
-    messagingSenderId: "<YOUR_MESSAGING_SENDER_ID>",
-    appId: "<YOUR_APP_ID>",
-  };
-
-  const app = firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+<script type="module">
+  import { auth } from '/js/firebase.js';
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
   // Show Sign Up Form
-  function showSignUpForm() {
+  window.showSignUpForm = function () {
     document.getElementById("login-form").style.display = "none";
     document.getElementById("signup-form").style.display = "block";
-  }
+  };
 
   // Show Login Form
-  function showLoginForm() {
+  window.showLoginForm = function () {
     document.getElementById("signup-form").style.display = "none";
     document.getElementById("login-form").style.display = "block";
-  }
+  };
 
-  // Login function
-  function login() {
+  // Login
+  document.getElementById("login-btn").addEventListener("click", () => {
     const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-password").value;
 
-    auth
-      .signInWithEmailAndPassword(email, password)
+    signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        window.location.href = "/dashboard"; // Redirect on success
+        window.location.href = "/";
       })
-      .catch((error) => {
-        const errorMessage = error.message;
-        document.getElementById("login-error").style.display = "block";
-        document.getElementById("login-error").innerText = errorMessage;
+      .catch(error => {
+        const loginError = document.getElementById("login-error");
+        loginError.style.display = "block";
+        loginError.innerText = error.message;
       });
-  }
+  });
 
-  // Sign Up function
-  function signUp() {
+  // Sign Up
+  document.getElementById("signup-btn").addEventListener("click", () => {
     const email = document.getElementById("signup-email").value;
     const password = document.getElementById("signup-password").value;
-    const confirmPassword = document.getElementById(
-      "signup-confirm-password"
-    ).value;
+    const confirmPassword = document.getElementById("signup-confirm-password").value;
 
     if (password !== confirmPassword) {
-      document.getElementById("signup-error").style.display = "block";
-      document.getElementById("signup-error").innerText =
-        "Passwords do not match";
+      const signupError = document.getElementById("signup-error");
+      signupError.style.display = "block";
+      signupError.innerText = "Passwords do not match";
       return;
     }
 
-    auth
-      .createUserWithEmailAndPassword(email, password)
+    createUserWithEmailAndPassword(auth, email, password)
       .then(() => {
-        window.location.href = "/dashboard"; // Redirect on success
+        window.location.href = "/";
       })
-      .catch((error) => {
-        const errorMessage = error.message;
-        document.getElementById("signup-error").style.display = "block";
-        document.getElementById("signup-error").innerText = errorMessage;
+      .catch(error => {
+        const signupError = document.getElementById("signup-error");
+        signupError.style.display = "block";
+        signupError.innerText = error.message;
       });
-  }
+  });
 </script>
+
