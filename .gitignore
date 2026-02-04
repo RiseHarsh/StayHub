@@ -33,6 +33,4 @@ package-lock.json
 
 stayhub-1-firebase-adminsdk-fbsvc-be2e49ff02.json
 
-public/js/firebase.js
-
-firebase.js
+.env

@@ -17,6 +17,13 @@ body{
     border-radius: 1rem 1rem 0rem 0rem !important;
 }
 
+.btn:hover{
+    background-color: #0d9488 !important;
+    color: white !important;
+    border-radius: 25px !important;
+    transition: all 0.3s ease-in-out;
+}
+
 .card{
     border-radius: 1rem !important;
     border-style: none;
