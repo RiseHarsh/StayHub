@@ -48,12 +48,17 @@ const authenticateUser = async (req, res, next) => {
 
 app.use(authenticateUser);
 
-
 app.use((req, res, next) => {
   res.locals.user = req.user; // now available in all EJS templates
-  console.log(req.user);
   next();
 });
+
+const isLoggedIn = (req, res, next) => {
+  if (!req.user) {
+    return res.redirect('/auth');
+  }
+  next();
+};
 
 
 // Make Firebase Web config available to all EJS views
@@ -110,7 +115,81 @@ app.post('/sessionLogin', async (req, res) => {
   }
 });
 
+// Wishlist Route
+// Toggle Wishlist (Add / Remove)
+app.post("/wishlist/toggle", isLoggedIn, async (req, res) => {
+  const { propertyId } = req.body;
 
+  if (!propertyId) {
+    return res.status(400).json({ error: "Property ID is required" });
+  }
+
+  try {
+    const userRef = db.collection("users").doc(req.user.uid);
+    const userDoc = await userRef.get();
+
+    let isSaved = false;
+
+    if (userDoc.exists && userDoc.data().wishlist?.includes(propertyId)) {
+      // REMOVE
+      await userRef.update({
+        wishlist: admin.firestore.FieldValue.arrayRemove(propertyId),
+      });
+      isSaved = false;
+    } else {
+      // ADD
+      await userRef.set(
+        {
+          wishlist: admin.firestore.FieldValue.arrayUnion(propertyId),
+        },
+        { merge: true }
+      );
+      isSaved = true;
+    }
+
+    return res.json({ saved: isSaved });
+
+  } catch (error) {
+    console.error("Wishlist Toggle Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+// Show My Wishlist
+app.get("/profile/wishlist", isLoggedIn, async (req, res) => {
+  try {
+    const userRef = db.collection("users").doc(req.user.uid);
+    const userDoc = await userRef.get();
+
+    // If user has no wishlist
+    if (!userDoc.exists || !userDoc.data().wishlist) {
+      return res.render("wishlist", { listings: [] });
+    }
+
+    const wishlistIds = userDoc.data().wishlist;
+
+    // Fetch all properties from "lists" collection
+    const listings = [];
+
+    for (const id of wishlistIds) {
+      const propertyDoc = await db.collection("lists").doc(id).get();
+
+      if (propertyDoc.exists) {
+        listings.push({
+          id: propertyDoc.id,
+          ...propertyDoc.data()
+        });
+      }
+    }
+
+    res.render("mywishlist", { listings });
+
+  } catch (error) {
+    console.error("Fetch Wishlist Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 
 //view route
@@ -124,12 +203,25 @@ app.get('/property/:id', async (req, res) => {
     }
 
     const listing = { id: doc.id, ...doc.data() };
-    res.render('view-page', { listing });
+
+    let isWishlisted = false;
+
+    if (req.user) {
+      const userDoc = await db.collection("users").doc(req.user.uid).get();
+
+      if (userDoc.exists && userDoc.data().wishlist) {
+        isWishlisted = userDoc.data().wishlist.includes(req.params.id);
+      }
+    }
+
+    res.render('view-page', { listing, isWishlisted });
+
   } catch (error) {
     console.error('Error fetching property:', error);
     res.status(500).send('Internal Server Error');
   }
 });
+
 
 //authentication route
 app.get('/auth', (req, res) => {

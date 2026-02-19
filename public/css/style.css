@@ -45,15 +45,28 @@ body{
   display: inline-block;
 }
 
-.card-img-overlay{
+/* .card-img-overlay{
     opacity: 0;
 }
 
 .card-img-overlay:hover{
     opacity: 0.5;
-    /* background-color: rgba(0, 0, 0, 0.5); */
+    /* background-color: rgba(0, 0, 0, 0.5); *
     background-color: white;
     color: black;
     border-radius: 1rem !important;
     transition: all 0.3s ease-in-out;
+} */
+
+.card-img-overlay {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    border-radius: 1rem;
+    padding: 1rem;
+}
+
+.card:hover .card-img-overlay {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
 }

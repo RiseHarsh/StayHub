@@ -1,64 +1,13 @@
-<!-- <section class="listings ">
-        <h1>Our Top Listings</h1>
-        <div class="listing-container">
-            <% listings.forEach(function(listing) { %>
-                <div class="listing-card">
-                    <img src="" alt="<%= listing.title %>">
-                    <h2></h2>
-                    <p><%= listing.description %></p>
-                    <p><strong>Location:</strong> <%= listing.location %>, <%= listing.country %></p>
-                    <p><strong>Price: $</strong></p>
-                    <button>Book Now</button>
-                </div>
-            <% }); %>
-        </div>
-    </section> -->
-
-<!-- <a class="click" href="">
-  <div
-    class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1 g-4 plus-jakarta-sans-uniquifier">
-
-    <% listings.forEach(function(listing) { %>
-    <div class="card cols" style="width: 20rem">
-      <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
-      <div class="card-body">
-        <h5 class="card-title"><%= listing.title %></h5>
-        <p class="card-text">&#8377; <%= listing.price %>/night</p>
-        <a href="#" class="btn btn-primary">Book Now</a>
-      </div>
-    </div>
-    <% }); %>
-  </div>
-</a> -->
-
-<!-- <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
-  <% listings.forEach(function(listing) { %>
-    <div class="col mb-4 card-height">
-      <a href="/property/<%= listings._id %>" class="card-link">
-        <div class="card" style="width: 20rem">
-          <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
-          <div class="card-img-overlay"><%= listing.description %></div>
-          <div class="card-body d-flex flex-column">
-            <b><%= listing.title %></b>  <br>
-            <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %>/night</p>
-            <a href="#" class="btn btn-primary">Book Now</a>
-          </div>
-        </div>
-      </a>
-    </div>
-  <% }); %>
-</div> -->
-
 <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
   <% listings.forEach(function(listing) { %>
     <div class="col mb-4 card-height">
       <div class="card card-click" data-id="<%= listing.id %>" style="width: 20rem">
-        <img class="card-img-top" src="<%= listing.image.url %>" alt="cottages" />
+        <img class="card-img-top" src="<%= listing.image.url %>" alt="<%= listing.title %>" />
         <div class="card-img-overlay"><%= listing.description %></div>
         <div class="card-body d-flex flex-column">
           <b><%= listing.title %></b><br>
           <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %>/night</p>
-          <a href="#" class="btn btn-primary">Book Now</a>
+          <a href="/property/<%= listing.id %>" class="btn btn-primary">Book Now</a>
         </div>
       </div>
     </div>
