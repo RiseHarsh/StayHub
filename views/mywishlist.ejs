@@ -5,7 +5,7 @@
       <p>You haven't saved any properties yet.</p>
     <% } %>
   
-    <div class="row">
+    <div class="row card-click">
       <% listings.forEach(listing => { %>
         <div class="col-md-4 mb-4">
           <div class="card shadow">
@@ -30,3 +30,15 @@
     </div>
   </div>
   
+
+  <!-- <script>
+    // Select all cards and attach click event listeners
+    document.querySelectorAll('.card-click').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-id');
+        // console.log('Card clicked with ID:', id);
+        // Optional: navigate to the property page
+        window.location.href = `profile/wishlist/property/${id}`;
+      });
+    });
+  </script> -->

@@ -222,6 +222,10 @@ app.get('/property/:id', async (req, res) => {
   }
 });
 
+// profile page route
+app.get('/profile', isLoggedIn, async (req, res) => {
+  res.render("user_profile")
+})
 
 //authentication route
 app.get('/auth', (req, res) => {
