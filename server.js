@@ -4,6 +4,7 @@ const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
+const wrapAsync = require('./utils/wrapAsync');
 app.use(cookieParser());
 
 
@@ -13,7 +14,7 @@ app.use(express.static(path.join(__dirname, 'assets')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); 
+app.use(express.json());
 app.use(expressLayouts);
 app.set('layout', 'layouts/boilerplate');
 
@@ -76,156 +77,161 @@ app.use((req, res, next) => {
 });
 
 
-app.get('/', async (req, res) => {
-  try {
-    const snapshot = await db.collection('lists').get();
-    const listings = snapshot.docs.map(doc => ({
-      id: doc.id,      // <-- include the document ID
-      ...doc.data()    // <-- spread the rest of the fields
-    }));
-    res.render('landingpage', { listings });
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
+app.get('/', wrapAsync(async (req, res) => {
+  const snapshot = await db.collection('lists').get();
+  const listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  res.render('landingpage', { listings });
+}));
 
-app.post('/sessionLogin', async (req, res) => {
+app.post('/sessionLogin', wrapAsync(async (req, res) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).send('Unauthorized');
-  }
+  if (!authHeader?.startsWith('Bearer ')) return res.status(401).send('Unauthorized');
 
   const idToken = authHeader.split('Bearer ')[1];
+  const decodedToken = await admin.auth().verifyIdToken(idToken);
+  const expiresIn = 30 * 60 * 1000;
 
-  try {
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-    const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
+  const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
 
-    res.cookie('session', sessionCookie, {
-      maxAge: expiresIn,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'
-    });
+  res.cookie('session', sessionCookie, {
+    maxAge: expiresIn,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
+  });
 
-    res.send({ message: 'Login successful' });
-  } catch (error) {
-    console.error('Error creating session cookie:', error);
-    res.status(401).send('Unauthorized');
-  }
-});
+  const userRef = db.collection("users").doc(decodedToken.uid);
+
+  let username = decodedToken.name?.trim() || `Guest${Math.floor(10000 + Math.random() * 90000)}`;
+
+  await userRef.set({
+    name: username,
+    email: decodedToken.email,
+    photoURL: decodedToken.picture || "",
+    role: "guest",
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
+
+  res.send({ message: 'Login successful' });
+}));
 
 // Wishlist Route
 // Toggle Wishlist (Add / Remove)
-app.post("/wishlist/toggle", isLoggedIn, async (req, res) => {
+app.post("/wishlist/toggle", isLoggedIn, wrapAsync(async (req, res) => {
   const { propertyId } = req.body;
+  if (!propertyId) return res.status(400).json({ error: "Property ID is required" });
 
-  if (!propertyId) {
-    return res.status(400).json({ error: "Property ID is required" });
+  const userRef = db.collection("users").doc(req.user.uid);
+  const userDoc = await userRef.get();
+  let isSaved = false;
+
+  if (userDoc.exists && userDoc.data().wishlist?.includes(propertyId)) {
+    await userRef.update({ wishlist: admin.firestore.FieldValue.arrayRemove(propertyId) });
+    isSaved = false;
+  } else {
+    await userRef.set({ wishlist: admin.firestore.FieldValue.arrayUnion(propertyId) }, { merge: true });
+    isSaved = true;
   }
 
-  try {
-    const userRef = db.collection("users").doc(req.user.uid);
-    const userDoc = await userRef.get();
-
-    let isSaved = false;
-
-    if (userDoc.exists && userDoc.data().wishlist?.includes(propertyId)) {
-      // REMOVE
-      await userRef.update({
-        wishlist: admin.firestore.FieldValue.arrayRemove(propertyId),
-      });
-      isSaved = false;
-    } else {
-      // ADD
-      await userRef.set(
-        {
-          wishlist: admin.firestore.FieldValue.arrayUnion(propertyId),
-        },
-        { merge: true }
-      );
-      isSaved = true;
-    }
-
-    return res.json({ saved: isSaved });
-
-  } catch (error) {
-    console.error("Wishlist Toggle Error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  res.json({ saved: isSaved });
+}));
 
 
 // Show My Wishlist
-app.get("/profile/wishlist", isLoggedIn, async (req, res) => {
-  try {
-    const userRef = db.collection("users").doc(req.user.uid);
-    const userDoc = await userRef.get();
+app.get("/profile/wishlist", isLoggedIn, wrapAsync(async (req, res) => {
+  const userRef = db.collection("users").doc(req.user.uid);
+  const userDoc = await userRef.get();
 
-    // If user has no wishlist
-    if (!userDoc.exists || !userDoc.data().wishlist) {
-      return res.render("wishlist", { listings: [] });
-    }
-
-    const wishlistIds = userDoc.data().wishlist;
-
-    // Fetch all properties from "lists" collection
-    const listings = [];
-
-    for (const id of wishlistIds) {
-      const propertyDoc = await db.collection("lists").doc(id).get();
-
-      if (propertyDoc.exists) {
-        listings.push({
-          id: propertyDoc.id,
-          ...propertyDoc.data()
-        });
-      }
-    }
-
-    res.render("mywishlist", { listings });
-
-  } catch (error) {
-    console.error("Fetch Wishlist Error:", error);
-    res.status(500).send("Internal Server Error");
+  if (!userDoc.exists || !userDoc.data().wishlist) {
+    return res.render("mywishlist", { listings: [] });
   }
-});
+
+  const wishlistIds = userDoc.data().wishlist;
+  const listings = [];
+
+  for (const id of wishlistIds) {
+    const propertyDoc = await db.collection("lists").doc(id).get();
+    if (propertyDoc.exists) {
+      listings.push({ id: propertyDoc.id, ...propertyDoc.data() });
+    }
+  }
+
+  res.render("mywishlist", { listings });
+}));
+
 
 
 //view route
-app.get('/property/:id', async (req, res) => {
-  try {
-    const docRef = db.collection('lists').doc(req.params.id);
-    const doc = await docRef.get();
+app.get('/property/:id', wrapAsync(async (req, res) => {
+  const docRef = db.collection('lists').doc(req.params.id);
+  const doc = await docRef.get();
+  if (!doc.exists) return res.status(404).send('Property not found');
 
-    if (!doc.exists) {
-      return res.status(404).send('Property not found');
+  const listing = { id: doc.id, ...doc.data() };
+  let isWishlisted = false;
+
+  if (req.user) {
+    const userDoc = await db.collection("users").doc(req.user.uid).get();
+    if (userDoc.exists && userDoc.data().wishlist) {
+      isWishlisted = userDoc.data().wishlist.includes(req.params.id);
     }
-
-    const listing = { id: doc.id, ...doc.data() };
-
-    let isWishlisted = false;
-
-    if (req.user) {
-      const userDoc = await db.collection("users").doc(req.user.uid).get();
-
-      if (userDoc.exists && userDoc.data().wishlist) {
-        isWishlisted = userDoc.data().wishlist.includes(req.params.id);
-      }
-    }
-
-    res.render('view-page', { listing, isWishlisted });
-
-  } catch (error) {
-    console.error('Error fetching property:', error);
-    res.status(500).send('Internal Server Error');
   }
-});
+
+  res.render('view-page', { listing, isWishlisted });
+}));
 
 // profile page route
-app.get('/profile', isLoggedIn, async (req, res) => {
-  res.render("user_profile")
-})
+
+app.get('/profile', isLoggedIn, wrapAsync(async (req, res) => {
+  const userRef = db.collection("users").doc(req.user.uid);
+  const userDoc = await userRef.get();
+  const userData = userDoc.exists ? userDoc.data() : {};
+  const bookings = []; // placeholder
+  res.render("user_profile", { user: userData, bookings });
+}));
+app.post("/profile/update", isLoggedIn, wrapAsync(async (req, res) => {
+  const { name, phone, bio } = req.body;
+  await db.collection("users").doc(req.user.uid).set({
+    name: name || "",
+    phone: phone || "",
+    bio: bio || "",
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+  res.redirect("/profile");
+}));
+
+// Example: Profile Photo Update
+app.post("/profile/update-photo", isLoggedIn, wrapAsync(async (req, res) => {
+  const { photoURL } = req.body;
+
+  await db.collection("users").doc(req.user.uid).set({
+    photoURL,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  await admin.auth().updateUser(req.user.uid, { photoURL });
+
+  res.json({ success: true });
+}));
+
+// Host Dashboard (Partners Page)
+app.get('/partners', isLoggedIn, wrapAsync(async (req, res) => {
+  // Fetch properties listed by this host
+  const snapshot = await db.collection('lists')
+    .where('hostId', '==', req.user.uid)
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  const properties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  // Optionally, count total bookings, etc.
+  // const bookingsSnapshot = await db.collection('bookings')
+  //   .where('hostId', '==', req.user.uid)
+  //   .get();
+  // const totalBookings = bookingsSnapshot.size;
+
+  res.render('partners_landing_page', { user: req.user, properties });
+}));
 
 //authentication route
 app.get('/auth', (req, res) => {
@@ -239,10 +245,22 @@ app.get('/logout', (req, res) => {
 });
 
 //404 route
-app.use((req,res)=>{
+app.use((req, res) => {
   res.status(404).send('404 Page Not Found');
 
 });
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+
+  if (req.headers['content-type']?.includes('application/json')) {
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+
+  res.status(500).send('Something went wrong! Please try again later.');
+});
+
 
 app.listen(8080, () => {
   console.log('Server is running on port 8080');

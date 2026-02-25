@@ -3,152 +3,133 @@
     <!-- Login Form -->
     <div id="login-form">
       <h3>Login</h3>
-      <div
-        class="alert alert-danger"
-        id="login-error"
-        style="display: none"
-      ></div>
-      <div class="form-group">
-        <label for="login-email">Email</label>
-        <i class="material-icons">email</i>
-        <input
-          type="email"
-          id="login-email"
-          class="form-control"
-          placeholder="Enter your email"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label for="login-password">Password</label>
-        <i class="material-icons">lock</i>
-        <input
-          type="password"
-          id="login-password"
-          class="form-control"
-          placeholder="Enter your password"
-          required
-        />
-      </div>
-      <button class="btn" id="login-btn">Login</button>
-      <div class="switch-btn">
-        <span
-          >Don't have an account?
-          <a href="javascript:void(0);" onclick="showSignUpForm()"
-            >Sign Up</a
-          ></span
-        >
+      <div class="alert alert-danger" id="login-error" style="display: none"></div>
+
+      <form id="loginForm" class="needs-validation" novalidate>
+        <!-- Email -->
+        <div class="form-group mb-3">
+          <label for="login-email">Email</label>
+          <i class="material-icons">email</i>
+          <input type="email" id="login-email" class="form-control" placeholder="Enter your email" required>
+          <div class="invalid-feedback">Please enter a valid email.</div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group mb-3">
+          <label for="login-password">Password</label>
+          <i class="material-icons">lock</i>
+          <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required minlength="6">
+          <div class="invalid-feedback">Password must be at least 6 characters.</div>
+        </div>
+
+        <button class="btn btn-primary w-100" type="submit">Login</button>
+      </form>
+
+      <div class="switch-btn mt-3 text-center">
+        <span>Don't have an account? <a href="javascript:void(0);" onclick="showSignUpForm()">Sign Up</a></span>
       </div>
     </div>
 
     <!-- Sign Up Form -->
     <div id="signup-form" style="display: none">
       <h3>Sign Up</h3>
-      <div
-        class="alert alert-danger"
-        id="signup-error"
-        style="display: none"
-      ></div>
-      <div class="form-group">
-        <label for="name">Name</label>
-        <i class="material-icons">name</i>
-        <input
-          type="text"
-          id="name"
-          class="form-control"
-          placeholder="Enter your Name"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label for="signup-email">Email</label>
-        <i class="material-icons">email</i>
-        <input
-          type="email"
-          id="signup-email"
-          class="form-control"
-          placeholder="Enter your email"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label for="signup-password">Password</label>
-        <i class="material-icons">lock</i>
-        <input
-          type="password"
-          id="signup-password"
-          class="form-control"
-          placeholder="Create a password"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label for="signup-confirm-password">Confirm Password</label>
-        <i class="material-icons">lock</i>
-        <input
-          type="password"
-          id="signup-confirm-password"
-          class="form-control"
-          placeholder="Confirm your password"
-          required
-        />
-      </div>
-      <button class="btn" id="signup-btn">Sign Up</button>
-      <div class="switch-btn">
-        <span
-          >Already have an account?
-          <a href="javascript:void(0);" onclick="showLoginForm()"
-            >Login</a
-          ></span
-        >
+      <div class="alert alert-danger" id="signup-error" style="display: none"></div>
+
+      <form id="signupForm" class="needs-validation" novalidate>
+        <!-- Name -->
+        <div class="form-group mb-3">
+          <label for="name">Name</label>
+          <i class="material-icons">person</i>
+          <input type="text" id="name" class="form-control" placeholder="Enter your Name" required>
+          <div class="invalid-feedback">Please enter your full name.</div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group mb-3">
+          <label for="signup-email">Email</label>
+          <i class="material-icons">email</i>
+          <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
+          <div class="invalid-feedback">Please enter a valid email address.</div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group mb-3">
+          <label for="signup-password">Password</label>
+          <i class="material-icons">lock</i>
+          <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required minlength="6">
+          <div class="invalid-feedback">Password must be at least 6 characters.</div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group mb-3">
+          <label for="signup-confirm-password">Confirm Password</label>
+          <i class="material-icons">lock</i>
+          <input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm your password" required>
+          <div class="invalid-feedback" id="confirmPasswordFeedback">Passwords do not match.</div>
+        </div>
+
+        <button class="btn btn-primary w-100" id="signup-btn" type="submit">Sign Up</button>
+      </form>
+
+      <div class="switch-btn mt-3 text-center">
+        <span>Already have an account? <a href="javascript:void(0);" onclick="showLoginForm()">Login</a></span>
       </div>
     </div>
   </div>
 </main>
 
-<!-- Firebase SDK -->
 <script type="module">
   import { auth } from "/js/firebase.js";
-  import {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-  // Show Sign Up Form
-  window.showSignUpForm = function () {
+  // ================== Bootstrap Validation ==================
+  (function() {
+    'use strict';
+
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+
+  // ================== Form Toggle ==================
+  window.showSignUpForm = () => {
     document.getElementById("login-form").style.display = "none";
     document.getElementById("signup-form").style.display = "block";
+    document.getElementById("login-error").style.display = "none";
+    document.getElementById("signup-error").style.display = "none";
   };
 
-  // Show Login Form
-  window.showLoginForm = function () {
+  window.showLoginForm = () => {
     document.getElementById("signup-form").style.display = "none";
     document.getElementById("login-form").style.display = "block";
     document.getElementById("login-error").style.display = "none";
     document.getElementById("signup-error").style.display = "none";
   };
 
-  // Login
-  document.getElementById("login-btn").addEventListener("click", async () => {
-    const email = document.getElementById("login-email").value;
-    const password = document.getElementById("login-password").value;
+  // ================== LOGIN ==================
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value.trim();
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      const token = await user.getIdToken();
+      const token = await userCredential.user.getIdToken();
 
-      const response = await fetch('/sessionLogin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        credentials: 'include'
+      const response = await fetch("/sessionLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        credentials: "include"
       });
 
-      if (!response.ok) throw new Error('Failed to create session');
-
+      if (!response.ok) throw new Error("Session creation failed");
       window.location.href = "/";
     } catch (error) {
       const loginError = document.getElementById("login-error");
@@ -157,65 +138,69 @@
     }
   });
 
-  // Sign Up
-  document.getElementById("signup-btn").addEventListener("click", () => {
-    const email = document.getElementById("signup-email").value;
-    const password = document.getElementById("signup-password").value;
-    const confirmPassword = document.getElementById("signup-confirm-password").value;
+  // ================== SIGNUP ==================
+  document.getElementById("signupForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    if (password !== confirmPassword) {
-      const signupError = document.getElementById("signup-error");
-      signupError.style.display = "block";
-      signupError.innerText = "Passwords do not match";
-      return;
+    let name = document.getElementById("name").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
+    const password = document.getElementById("signup-password").value.trim();
+    const confirmPassword = document.getElementById("signup-confirm-password").value.trim();
+
+    // Auto-generate professional name if empty
+    if (!name) {
+      const randomNum = Math.floor(10000 + Math.random() * 90000);
+      name = `Guest${randomNum}`;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
-        const token = await user.getIdToken();
+    // Password match validation
+    if (password !== confirmPassword) {
+      const feedback = document.getElementById("confirmPasswordFeedback");
+      feedback.style.display = "block";
+      document.getElementById("signup-confirm-password").classList.add("is-invalid");
+      return;
+    } else {
+      const feedback = document.getElementById("confirmPasswordFeedback");
+      feedback.style.display = "none";
+      document.getElementById("signup-confirm-password").classList.remove("is-invalid");
+    }
 
-        const response = await fetch('/sessionLogin', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          credentials: 'include'
-        });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: name });
 
-        if (!response.ok) throw new Error('Failed to create session');
-
-        window.location.href = "/";
-      })
-      .catch((error) => {
-        const signupError = document.getElementById("signup-error");
-        signupError.style.display = "block";
-        signupError.innerText = getAuthErrorMessage(error.code, "signup");
+      const token = await userCredential.user.getIdToken();
+      const response = await fetch("/sessionLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        credentials: "include"
       });
-  }); // <-- THIS closes signup addEventListener
 
-  // Error messages helper
-  function getAuthErrorMessage(code, type = "login") {
-    switch (code) {
-      case "auth/email-already-in-use":
-        return "An account with this email already exists.";
-      case "auth/invalid-email":
-        return "Please enter a valid email address.";
-      case "auth/weak-password":
-        return "Password must be at least 6 characters long.";
+      if (!response.ok) throw new Error("Session creation failed");
+      window.location.href = "/";
+    } catch (error) {
+      showSignupError(getAuthErrorMessage(error.code, "signup"));
+    }
+  });
+
+  // ================== Helper Functions ==================
+  function showSignupError(message) {
+    const signupError = document.getElementById("signup-error");
+    signupError.style.display = "block";
+    signupError.innerText = message;
+  }
+
+  function getAuthErrorMessage(code, type="login") {
+    switch(code){
+      case "auth/email-already-in-use": return "An account with this email already exists.";
+      case "auth/invalid-email": return "Please enter a valid email address.";
+      case "auth/weak-password": return "Password must be at least 6 characters.";
       case "auth/user-not-found":
       case "auth/wrong-password":
-      case "auth/invalid-credential":
-        return "Invalid email or password.";
-      case "auth/network-request-failed":
-        return "Network error. Please check your internet connection.";
-      case "auth/too-many-requests":
-        return "Too many attempts. Please try again later.";
-      default:
-        return type === "signup"
-          ? "Signup failed. Please try again."
-          : "Login failed. Please try again.";
+      case "auth/invalid-credential": return "Invalid email or password.";
+      case "auth/network-request-failed": return "Network error. Check your connection.";
+      case "auth/too-many-requests": return "Too many attempts. Try again later.";
+      default: return type === "signup" ? "Signup failed. Please try again." : "Login failed. Please try again.";
     }
   }
 </script>
